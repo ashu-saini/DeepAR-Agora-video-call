@@ -100,8 +100,42 @@
     <div class="button-group">
       <button id="join" type="submit" class="btn btn-primary btn-sm">Join</button>
       <button id="leave" type="button" class="btn btn-primary btn-sm" disabled>Leave</button>
+      <!-- Button trigger modal -->
+      <button type="button" class="btn btn-primary btn-sm" onclick="openModal()">Select Effect</button>
     </div>
   </form>
+
+  <!-- Modal -->
+  <div class="modal fade" id="effectModal" tabindex="-1" role="dialog" aria-labelledby="effectModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" onclick="closeModal()">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <canvas class="deepar" id="deepar-canvas" oncontextmenu="event.preventDefault()"></canvas>
+          <ul class="nav nav-pills mb-3" id="pills-tab" role="tablist">
+            <li class="nav-item">
+              <a class="nav-link active" id="pills-profile-tab" data-toggle="pill" href="#pills-background" role="tab" aria-controls="pills-background" aria-selected="false">Bacgrounds</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" id="pills-contact-tab" data-toggle="pill" href="#pills-effect" role="tab" aria-controls="pills-effect" aria-selected="false">Effects</a>
+            </li>
+          </ul>
+          <div class="tab-content" id="pills-tabContent">
+            <div class="tab-pane fade show active effect-conatiner" id="pills-background" role="tabpanel" aria-labelledby="pills-profile-tab">
+               <ul class="d-flex justify-content-around effect-tab" id="background-list"></ul>
+            </div>
+            <div class="tab-pane fade effect-conatiner" id="pills-effect" role="tabpanel" aria-labelledby="pills-contact-tab">
+              <ul class="d-flex justify-content-around effect-tab" id="effect-list"></ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
   <!--
     This local media splayer is enabled when the user has successfully joined a Video Call channel.
   -->
@@ -115,17 +149,17 @@
       <div id="remote-playerlist"></div>
     </div>
   </div>
+  <video
+    id="my-video"
+    width="480"
+    height="320"
+    playsinline
+    autoplay
+    muted
+    style="display: none;"
+  />
+  <!-- <canvas class="deepar" id="deepar-canvas" oncontextmenu="event.preventDefault()"></canvas> -->
 </div>
-<video
-  id="my-video"
-  width="480"
-  height="320"
-  playsinline
-  autoplay
-  muted
-  style="display: none;"
-/>
-<canvas class="deepar" id="deepar-canvas" oncontextmenu="event.preventDefault()"></canvas>
 
 <!--
   Import the Agora Video Call SDK for Web and local calls to it.

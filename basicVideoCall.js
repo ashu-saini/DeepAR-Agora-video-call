@@ -36,6 +36,100 @@ var options = {
   token: null
 };
 
+var backgrounds = [
+  {
+    name: 'BG Blur',
+    value: 'bg_blur'
+  },
+  {
+    name: 'Livingroom',
+    value: 'livingroom'
+  },
+  {
+    name: 'Office',
+    value: 'office'
+  },
+  {
+    name: 'Plastic Ocean',
+    value: 'plastic_ocean'
+  },
+  {
+    name: 'Beach1',
+    value: 'beach1'
+  },
+  {
+    name: 'Beach2',
+    value: 'beach2'
+  },
+  {
+    name: 'Beach3',
+    value: 'beach3'
+  },
+  {
+    name: 'BG Green',
+    value: 'bg_green'
+  },
+  {
+    name: 'BG Yello',
+    value: 'bg_yellow'
+  },
+  {
+    name: 'BG Pink',
+    value: 'bg_pink'
+  },
+  {
+    name: 'BG White',
+    value: 'bg_white'
+  },
+
+];
+
+var effects = [
+  {
+    name: 'Koala',
+    value: 'koala'
+  },
+  {
+    name: 'Aviators',
+    value: 'aviators'
+  },
+  {
+    name: 'Beard',
+    value: 'beard'
+  },
+  {
+    name: 'Beauty',
+    value: 'beauty'
+  },
+  {
+    name: 'Dalmatian',
+    value: 'dalmatian'
+  },
+  {
+    name: 'Flowers',
+    value: 'flowers'
+  },
+  {
+    name: 'Hair Effect',
+    value: 'hair_effect'
+  },
+  {
+    name: 'Lion',
+    value: 'lion'
+  },
+  {
+    name: 'Pumpkin',
+    value: 'pumpkin'
+  },
+  {
+    name: 'Teddycigar',
+    value: 'teddycigar'
+  }
+];
+
+var currentEffect = null;
+var isJoined = false;
+
 /*
  * When this page is called with parameters in the URL, this procedure
  * attempts to join a Video Call channel using those parameters.
@@ -71,6 +165,20 @@ $(document).ready(function() {
     }
   });
   deepAR.downloadFaceTrackingModel('lib/models-68-extreme.bin');
+
+  //append background list to backgrounds section
+  let blist = "" 
+  for(i = 0; i < backgrounds.length; i++) {
+    blist = blist + `<li onclick="changeEffect('${backgrounds[i].value}')">${backgrounds[i].name}</li>`
+  }
+  $("#background-list").append(blist);
+
+  // append effects list to effects section
+  let elist = "" 
+  for(i = 0; i < effects.length; i++) {
+    elist = elist + `<li onclick="changeEffect('${effects[i].value}')">${effects[i].name}</li>`
+  }
+  $("#effect-list").append(elist);
 })
 
 /*
@@ -111,45 +219,15 @@ $("#leave").click(function (e) {
  * Join a channel, then create local video and audio tracks and publish them to the channel.
  */
 async function join() {
-	const videoElement = document.getElementById('my-video');
-	const devices = await navigator.mediaDevices.enumerateDevices()
-	const videoDevice = devices.find(device => device.kind === 'videoinput')
-	if (!videoDevice) {
-		throw new Error('Could not get video device')
-	}
-
-	console.log('initMediaStream')
-	videoElement.srcObject = await navigator.mediaDevices.getUserMedia({
-		video: {
-			deviceId: videoDevice.deviceId,
-			frameRate: 30,
-			width: { ideal: 480 },
-			height: { ideal: 320 }
-		}
-	})
-
-	const playPromise = new Promise((resolve) => {
-		videoElement.addEventListener('play', () => {
-			console.log('playing local video now')
-			resolve()
-		})
-	})
-	const loadeddataPromise = new Promise((resolve) => {
-		videoElement.addEventListener('loadeddata', () => {
-			console.log('local video loadeddata')
-			resolve()
-		})
-	})
-
-	videoElement.play();
-	console.log(deepAR);
-	// set video elemet to DeepAR
-	deepAR.setVideoElement(videoElement, true);
+  loadStream();
 	//load AR effect
-	deepAR.switchEffect(0, 'slot', './effects/background_segmentation', function() {
-    // effect loaded
-  });
+  if(currentEffect) {
+    deepAR.switchEffect(0, 'slot', `./effects/${currentEffect}`, function() {
+      // effect loaded
+    });
+  }
 
+  // deepAR.changeParameterTexture('Background', 'MeshRenderer', 's_texColor', './effects/diffuse10.png');
   // Add an event listener to play remote tracks when remote user publishes.
   client.on("user-published", handleUserPublished);
   client.on("user-unpublished", handleUserUnpublished);
@@ -170,7 +248,44 @@ async function join() {
 
   // Publish the local video and audio tracks to the channel.
   await client.publish(Object.values(localTracks));
+  isJoined = true;
   console.log("publish success");
+}
+
+async function loadStream() {
+  const videoElement = document.getElementById('my-video');
+  const devices = await navigator.mediaDevices.enumerateDevices()
+  const videoDevice = devices.find(device => device.kind === 'videoinput')
+  if (!videoDevice) {
+    throw new Error('Could not get video device')
+  }
+
+  console.log('initMediaStream')
+  videoElement.srcObject = await navigator.mediaDevices.getUserMedia({
+    video: {
+      deviceId: videoDevice.deviceId,
+      frameRate: 30,
+      width: { ideal: 480 },
+      height: { ideal: 320 }
+    }
+  })
+
+  const playPromise = new Promise((resolve) => {
+    videoElement.addEventListener('play', () => {
+      console.log('playing local video now')
+      resolve()
+    })
+  })
+  const loadeddataPromise = new Promise((resolve) => {
+    videoElement.addEventListener('loadeddata', () => {
+      console.log('local video loadeddata')
+      resolve()
+    })
+  })
+
+  videoElement.play();
+  // set video elemet to DeepAR
+  deepAR.setVideoElement(videoElement, true);
 }
 
 /*
@@ -186,7 +301,7 @@ async function leave() {
     }
     const videoElement = document.getElementById('my-video');
     // stop custom tracks
-    (videoElement.srcObject).getTracks().forEach(track => track.stop())
+    (videoElement.srcObject).getTracks().forEach(track => track.stop());
   }
 
   // Remove remote users and player views.
@@ -200,6 +315,8 @@ async function leave() {
   $("#join").attr("disabled", false);
   $("#leave").attr("disabled", true);
   console.log("client leaves channel success");
+
+  isJoined = false;
 }
 
 
@@ -250,4 +367,27 @@ function handleUserUnpublished(user) {
   const id = user.uid;
   delete remoteUsers[id];
   $(`#player-wrapper-${id}`).remove();
+}
+
+function changeEffect(effectname) {
+  currentEffect = effectname;
+  deepAR.switchEffect(0, 'slot',  `./effects/${effectname}`, function() {
+    // effect loaded
+  });
+}
+
+async function openModal() {
+  if(!isJoined) {
+    loadStream();
+  }
+  $('#effectModal').modal('show');
+}
+
+function closeModal() {
+  if(!isJoined) {
+    const videoElement = document.getElementById('my-video');
+    // stop custom tracks
+    (videoElement.srcObject).getTracks().forEach(track => track.stop());
+  }
+  $('#effectModal').modal('hide');
 }

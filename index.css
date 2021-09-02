@@ -42,6 +42,28 @@ input {
   display: none;
 }
 
+.effect-tab {
+  margin: 0px;
+  padding: 0px;
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.effect-conatiner ul {
+  display: flex;
+  padding-left: 0;
+}
+
+.effect-conatiner ul li {
+  list-style: none;
+  flex: 0 0 32.333333%;
+  padding: 9px 14px 9px;
+  border-radius: 5px;
+  border: 2px solid gray;
+  margin-bottom: 4px;
+}
+
+
 @media (max-width: 640px) {
   .player {
     width: 320px;
