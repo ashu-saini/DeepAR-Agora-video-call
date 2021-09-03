@@ -179,6 +179,16 @@ $(document).ready(function() {
     elist = elist + `<li onclick="changeEffect('${effects[i].value}')">${effects[i].name}</li>`
   }
   $("#effect-list").append(elist);
+
+  $("#background-list li").click(function() {
+    $(this).addClass('active').siblings().removeClass('active');
+    $("#effect-list").children().removeClass('active');
+  });
+
+  $("#effect-list li").click(function() {
+    $(this).addClass('active').siblings().removeClass('active');
+    $("#background-list").children().removeClass('active');
+  });
 })
 
 /*
